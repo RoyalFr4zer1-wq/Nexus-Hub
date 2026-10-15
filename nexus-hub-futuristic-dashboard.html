@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS HUB | Futuristic Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0b0f19',
+                        cardBg: 'rgba(17, 24, 39, 0.7)',
+                        neonBlue: '#3b82f6',
+                        neonPurple: '#8b5cf6',
+                        neonCyan: '#06b6d4',
+                    },
+                    boxShadow: {
+                        'neon': '0 0 15px rgba(59, 130, 246, 0.3)',
+                        'neon-purple': '0 0 15px rgba(139, 92, 246, 0.3)',
+                        'glow': '0 0 25px rgba(6, 182, 212, 0.2)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0b0f19;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 40%);
+            color: #f3f4f6;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .glass-card {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <header class="glass-card sticky top-0 z-50 border-b border-gray-800 px-4 lg:px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-neon">
+                <i class="fa-solid fa-cube text-white text-lg"></i>
+            </div>
+            <div>
+                <span class="text-xl font-black tracking-wider bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-500 bg-clip-text text-transparent">NEXUS HUB</span>
+                <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-xs rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">v2.5 Pro</span>
+            </div>
+        </div>
+
+        <!-- Quick Search Bar -->
+        <div class="flex-1 max-w-xl mx-4">
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" id="globalSearch" placeholder="Search web, apps, or games..." 
+                    class="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-900/80 border border-gray-800 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+            </div>
+        </div>
+
+        <!-- Clock & Status -->
+        <div class="flex items-center space-x-4">
+            <div class="hidden md:flex flex-col text-right">
+                <span id="liveClock" class="text-sm font-semibold text-gray-200">00:00:00</span>
+                <span id="liveDate" class="text-xs text-gray-400">Loading date...</span>
+            </div>
+            <button onclick="toggleFullscreen()" class="p-2.5 rounded-xl glass-card text-gray-300 hover:text-white hover:border-blue-500/50 transition-all" title="Toggle Fullscreen">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex-1 flex">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 glass-card border-r border-gray-800 p-4 flex flex-col justify-between hidden md:flex transition-all duration-300">
+            <nav class="space-y-1.5">
+                <button onclick="switchTab('home')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-neon" data-target="home">
+                    <i class="fa-solid fa-house w-5"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button onclick="switchTab('launcher')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 transition-all" data-target="launcher">
+                    <i class="fa-solid fa-globe w-5"></i>
+                    <span>Web Launcher</span>
+                </button>
+                <button onclick="switchTab('media')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 transition-all" data-target="media">
+                    <i class="fa-solid fa-play w-5"></i>
+                    <span>Media & Video</span>
+                </button>
+                <button onclick="switchTab('games')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 transition-all" data-target="games">
+                    <i class="fa-solid fa-gamepad w-5"></i>
+                    <span>Arcade Games</span>
+                </button>
+                <button onclick="switchTab('favorites')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 transition-all" data-target="favorites">
+                    <i class="fa-solid fa-star w-5 text-amber-400"></i>
+                    <span>Favorites</span>
+                </button>
+            </nav>
+
+            <div class="pt-4 border-t border-gray-800/80 text-xs text-gray-500 text-center">
+                <p>NEXUS HUB Dashboard</p>
+                <p class="mt-1">Optimized for Chromebooks</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+
+            <!-- HOME TAB -->
+            <section id="tab-home" class="tab-content space-y-8">
+                <!-- Welcome Banner -->
+                <div class="glass-card rounded-2xl p-6 sm:p-8 relative overflow-hidden border border-blue-500/20 shadow-neon">
+                    <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-2">
+                        Welcome to <span class="bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-500 bg-clip-text text-transparent">NEXUS HUB</span>
+                    </h1>
+                    <p class="text-gray-400 text-sm sm:text-base max-w-2xl mb-6">
+                        Your secure, high-performance web portal for browsing shortcuts, streaming media, and playing HTML5 browser games.
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="switchTab('launcher')" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm transition-all shadow-neon flex items-center space-x-2">
+                            <i class="fa-solid fa-rocket"></i>
+                            <span>Open Launcher</span>
+                        </button>
+                        <button onclick="switchTab('games')" class="px-5 py-2.5 rounded-xl glass-card hover:bg-gray-800 text-gray-200 font-medium text-sm transition-all flex items-center space-x-2">
+                            <i class="fa-solid fa-gamepad"></i>
+                            <span>Play Games</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Access Grid -->
+                <div>
+                    <h2 class="text-lg font-bold text-white mb-4 flex items-center space-x-2">
+                        <i class="fa-solid fa-bolt text-blue-400"></i>
+                        <span>Quick Access</span>
+                    </h2>
+                    <div id="quickAccessGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Recently Opened -->
+                <div>
+                    <h2 class="text-lg font-bold text-white mb-4 flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-purple-400"></i>
+                        <span>Recently Opened</span>
+                    </h2>
+                    <div id="recentGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- WEBSITE LAUNCHER TAB -->
+            <section id="tab-launcher" class="tab-content hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Website Launcher</h2>
+                        <p class="text-sm text-gray-400">Add, organize, and launch your favorite sites securely.</p>
+                    </div>
+                    <button onclick="openAddModal()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-medium text-sm transition-all shadow-neon flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Add Website</span>
+                    </button>
+                </div>
+
+                <!-- Category Filters -->
+                <div class="flex flex-wrap gap-2" id="launcherCategories">
+                    <button onclick="filterLauncher('All')" class="cat-btn px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 text-white transition-all">All</button>
+                    <button onclick="filterLauncher('Video')" class="cat-btn px-4 py-2 rounded-xl text-xs font-semibold glass-card text-gray-300 hover:bg-gray-800 transition-all">Video</button>
+                    <button onclick="filterLauncher('Games')" class="cat-btn px-4 py-2 rounded-xl text-xs font-semibold glass-card text-gray-300 hover:bg-gray-800 transition-all">Games</button>
+                    <button onclick="filterLauncher('Music')" class="cat-btn px-4 py-2 rounded-xl text-xs font-semibold glass-card text-gray-300 hover:bg-gray-800 transition-all">Music</button>
+                    <button onclick="filterLauncher('Social')" class="cat-btn px-4 py-2 rounded-xl text-xs font-semibold glass-card text-gray-300 hover:bg-gray-800 transition-all">Social</button>
+                    <button onclick="filterLauncher('Education')" class="cat-btn px-4 py-2 rounded-xl text-xs font-semibold glass-card text-gray-300 hover:bg-gray-800 transition-all">Education</button>
+                </div>
+
+                <!-- Launcher Grid -->
+                <div id="launcherGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- MEDIA TAB -->
+            <section id="tab-media" class="tab-content hidden space-y-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Media Discovery</h2>
+                    <p class="text-sm text-gray-400">Explore top streaming platforms and video hubs.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="mediaGrid">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- GAMES TAB -->
+            <section id="tab-games" class="tab-content hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Arcade Games</h2>
+                        <p class="text-sm text-gray-400">Play lightweight HTML5 browser games instantly.</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="gamesGrid">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- FAVORITES TAB -->
+            <section id="tab-favorites" class="tab-content hidden space-y-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Favorites</h2>
+                    <p class="text-sm text-gray-400">Your bookmarked sites and items.</p>
+                </div>
+                <div id="favoritesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Add Website Modal -->
+    <div id="addModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl p-6 w-full max-w-md border border-gray-700 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white">Add Custom Website</h3>
+                <button onclick="closeAddModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Website Name</label>
+                    <input type="text" id="modalName" placeholder="e.g. GitHub" class="w-full px-3 py-2 rounded-xl bg-gray-900 border border-gray-700 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Website URL</label>
+                    <input type="url" id="modalUrl" placeholder="https://github.com" class="w-full px-3 py-2 rounded-xl bg-gray-900 border border-gray-700 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Category</label>
+                    <select id="modalCategory" class="w-full px-3 py-2 rounded-xl bg-gray-900 border border-gray-700 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <option value="Video">Video</option>
+                        <option value="Games">Games</option>
+                        <option value="Music">Music</option>
+                        <option value="Social">Social</option>
+                        <option value="Education">Education</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3 pt-2">
+                <button onclick="closeAddModal()" class="px-4 py-2 rounded-xl bg-gray-800 text-gray-300 hover:bg-gray-700 text-sm font-medium">Cancel</button>
+                <button onclick="saveCustomWebsite()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium shadow-neon">Save Website</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Default Data State
+        let websites = JSON.parse(localStorage.getItem('nexus_websites')) || [
+            { id: 1, name: 'YouTube', url: 'https://www.youtube.com', category: 'Video', icon: 'fa-youtube', color: 'text-red-500' },
+            { id: 2, name: 'Twitch', url: 'https://www.twitch.tv', category: 'Video', icon: 'fa-twitch', color: 'text-purple-400' },
+            { id: 3, name: 'Spotify', url: 'https://open.spotify.com', category: 'Music', icon: 'fa-spotify', color: 'text-green-400' },
+            { id: 4, name: 'TikTok', url: 'https://www.tiktok.com', category: 'Social', icon: 'fa-tiktok', color: 'text-cyan-400' },
+            { id: 5, name: 'Google', url: 'https://www.google.com', category: 'Education', icon: 'fa-google', color: 'text-blue-400' },
+            { id: 6, name: 'Khan Academy', url: 'https://www.khanacademy.org', category: 'Education', icon: 'fa-graduation-cap', color: 'text-emerald-400' },
+        ];
+
+        let favorites = JSON.parse(localStorage.getItem('nexus_favorites')) || [1, 3];
+        let recent = JSON.parse(localStorage.getItem('nexus_recent')) || [1, 2, 4];
+
+        const gamesList = [
+            { id: 101, name: '2048', url: 'https://play2048.co/', desc: 'Classic tile sliding puzzle game.', icon: 'fa-chess-board', color: 'text-amber-400' },
+            { id: 102, name: 'Tetris', url: 'https://tetris.com/play-tetris', desc: 'The legendary block stacking challenge.', icon: 'fa-cubes', color: 'text-blue-400' },
+            { id: 103, name: 'Pac-Man (Doodle)', url: 'https://www.google.com/logos/2010/pacman10-i.html', desc: 'Retro arcade maze runner.', icon: 'fa-ghost', color: 'text-yellow-400' },
+            { id: 104, name: 'Slither.io', url: 'https://slither.io', desc: 'Grow your snake and compete online.', icon: 'fa-worm', color: 'text-emerald-400' }
+        ];
+
+        // Clock & Date
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('liveClock').innerText = now.toLocaleTimeString();
+            document.getElementById('liveDate').innerText = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Tab Switching
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = "nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 transition-all";
+                if(btn.dataset.target === tabId) {
+                    btn.className = "nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-neon";
+                }
+            });
+            renderAll();
+        }
+
+        // Render Functions
+        function renderAll() {
+            renderQuickAccess();
+            renderRecent();
+            renderLauncher('All');
+            renderMedia();
+            renderGames();
+            renderFavorites();
+        }
+
+        function renderQuickAccess() {
+            const container = document.getElementById('quickAccessGrid');
+            container.innerHTML = websites.slice(0, 6).map(site => `
+                <div onclick="launchSite('${site.url}', ${site.id})" class="glass-card p-4 rounded-2xl cursor-pointer flex flex-col items-center text-center group transition-all hover:scale-105">
+                    <div class="w-12 h-12 rounded-xl bg-gray-800/80 flex items-center justify-center mb-3 group-hover:border-blue-500/50 border border-gray-700/50 transition-all">
+                        <i class="fa-solid ${site.icon || 'fa-globe'} text-xl ${site.color || 'text-blue-400'}"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-200 truncate w-full">${site.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderRecent() {
+            const container = document.getElementById('recentGrid');
+            const recSites = websites.filter(s => recent.includes(s.id));
+            container.innerHTML = recSites.map(site => `
+                <div onclick="launchSite('${site.url}', ${site.id})" class="glass-card p-3 rounded-xl cursor-pointer flex items-center space-x-3 hover:border-blue-500/40 transition-all">
+                    <div class="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center">
+                        <i class="fa-solid ${site.icon || 'fa-globe'} text-blue-400"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h4 class="text-xs font-bold text-gray-200 truncate">${site.name}</h4>
+                        <p class="text-[10px] text-gray-400 truncate">${site.category}</p>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-xs text-gray-500 col-span-4">No recent sites yet.</p>';
+        }
+
+        function renderLauncher(category) {
+            const container = document.getElementById('launcherGrid');
+            const filtered = category === 'All' ? websites : websites.filter(s => s.category === category);
+            
+            container.innerHTML = filtered.map(site => {
+                const isFav = favorites.includes(site.id);
+                return `
+                    <div class="glass-card p-4 rounded-2xl flex items-center justify-between group hover:border-blue-500/40 transition-all">
+                        <div class="flex items-center space-x-3 cursor-pointer flex-1 overflow-hidden" onclick="launchSite('${site.url}', ${site.id})">
+                            <div class="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center shrink-0">
+                                <i class="fa-solid ${site.icon || 'fa-globe'} ${site.color || 'text-blue-400'}"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <h4 class="text-sm font-bold text-gray-200 truncate">${site.name}</h4>
+                                <span class="text-[10px] px-2 py-0.5 rounded bg-gray-800 text-gray-400">${site.category}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-1 shrink-0 ml-2">
+                            <button onclick="toggleFavorite(${site.id})" class="p-2 text-gray-400 hover:text-amber-400 transition-colors">
+                                <i class="fa-${isFav ? 'solid' : 'regular'} fa-star ${isFav ? 'text-amber-400' : ''}"></i>
+                            </button>
+                            ${site.id > 6 ? `<button onclick="deleteWebsite(${site.id})" class="p-2 text-gray-400 hover:text-red-400 transition-colors"><i class="fa-solid fa-trash"></i></button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterLauncher(cat) {
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.className = "cat-btn px-4 py-2 rounded-xl text-xs font-semibold glass-card text-gray-300 hover:bg-gray-800 transition-all";
+                if(btn.innerText === cat) {
+                    btn.className = "cat-btn px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 text-white transition-all";
+                }
+            });
+            renderLauncher(cat);
+        }
+
+        function renderMedia() {
+            const container = document.getElementById('mediaGrid');
+            const mediaSites = websites.filter(s => s.category === 'Video' || s.category === 'Music' || s.category === 'Social');
+            container.innerHTML = mediaSites.map(site => `
+                <div class="glass-card p-6 rounded-2xl flex flex-col justify-between space-y-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center">
+                            <i class="fa-solid ${site.icon} text-2xl ${site.color}"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white text-base">${site.name}</h3>
+                            <span class="text-xs text-gray-400">${site.category} Platform</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400">Access official ${site.name} portal directly via secure connection.</p>
+                    <button onclick="launchSite('${site.url}', ${site.id})" class="w-full py-2.5 rounded-xl bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white font-medium text-xs transition-all border border-blue-500/30 flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-external-link"></i>
+                        <span>Open Platform</span>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderGames() {
+            const container = document.getElementById('gamesGrid');
+            container.innerHTML = gamesList.map(game => `
+                <div class="glass-card p-6 rounded-2xl flex flex-col justify-between space-y-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center">
+                            <i class="fa-solid ${game.icon} text-2xl ${game.color}"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white text-base">${game.name}</h3>
+                            <span class="text-xs text-gray-400">HTML5 Game</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400">${game.desc}</p>
+                    <button onclick="launchSite('${game.url}', 0)" class="w-full py-2.5 rounded-xl bg-purple-600/20 hover:bg-purple-600 text-purple-400 hover:text-white font-medium text-xs transition-all border border-purple-500/30 flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-play"></i>
+                        <span>Play Game</span>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderFavorites() {
+            const container = document.getElementById('favoritesGrid');
+            const favSites = websites.filter(s => favorites.includes(s.id));
+            container.innerHTML = favSites.map(site => `
+                <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
+                    <div class="flex items-center space-x-3 cursor-pointer flex-1 overflow-hidden" onclick="launchSite('${site.url}', ${site.id})">
+                        <div class="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center shrink-0">
+                            <i class="fa-solid ${site.icon || 'fa-globe'} ${site.color || 'text-blue-400'}"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <h4 class="text-sm font-bold text-gray-200 truncate">${site.name}</h4>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-gray-800 text-gray-400">${site.category}</span>
+                        </div>
+                    </div>
+                    <button onclick="toggleFavorite(${site.id})" class="p-2 text-amber-400 hover:text-gray-400 transition-colors">
+                        <i class="fa-solid fa-star"></i>
+                    </button>
+                </div>
+            `).join('') || '<p class="text-xs text-gray-500 col-span-3">No favorite sites bookmarked yet.</p>';
+        }
+
+        // Actions
+        function launchSite(url, id) {
+            if(id && id > 0 && !recent.includes(id)) {
+                recent.unshift(id);
+                if(recent.length > 4) recent.pop();
+                localStorage.setItem('nexus_recent', JSON.stringify(recent));
+            }
+            window.open(url, '_blank');
+        }
+
+        function toggleFavorite(id) {
+            if(favorites.includes(id)) {
+                favorites = favorites.filter(f => f !== id);
+            } else {
+                favorites.push(id);
+            }
+            localStorage.setItem('nexus_favorites', JSON.stringify(favorites));
+            renderAll();
+        }
+
+        function openAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+        }
+
+        function saveCustomWebsite() {
+            const name = document.getElementById('modalName').value.trim();
+            let url = document.getElementById('modalUrl').value.trim();
+            const category = document.getElementById('modalCategory').value;
+
+            if(!name || !url) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            if(!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+
+            const newSite = {
+                id: Date.now(),
+                name,
+                url,
+                category,
+                icon: 'fa-globe',
+                color: 'text-blue-400'
+            };
+
+            websites.push(newSite);
+            localStorage.setItem('nexus_websites', JSON.stringify(websites));
+            closeAddModal();
+            document.getElementById('modalName').value = '';
+            document.getElementById('modalUrl').value = '';
+            renderAll();
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+
+        // Global Search listener
+        document.getElementById('globalSearch').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            if(!query) {
+                renderAll();
+                return;
+            }
+            const filtered = websites.filter(s => s.name.toLowerCase().includes(query) || s.category.toLowerCase().includes(query));
+            const container = document.getElementById('launcherGrid');
+            switchTab('launcher');
+            container.innerHTML = filtered.map(site => `
+                <div class="glass-card p-4 rounded-2xl flex items-center justify-between group hover:border-blue-500/40 transition-all">
+                    <div class="flex items-center space-x-3 cursor-pointer flex-1 overflow-hidden" onclick="launchSite('${site.url}', ${site.id})">
+                        <div class="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center shrink-0">
+                            <i class="fa-solid ${site.icon || 'fa-globe'} ${site.color || 'text-blue-400'}"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <h4 class="text-sm font-bold text-gray-200 truncate">${site.name}</h4>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-gray-800 text-gray-400">${site.category}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-xs text-gray-500">No matching websites found.</p>';
+        });
+
+        // Initial Render
+        renderAll();
+    </script>
+</body>
+</html>
